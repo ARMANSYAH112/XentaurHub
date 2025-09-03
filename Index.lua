@@ -1,9 +1,12 @@
+
 -- index.lua
--- XentaurHub Loader
+-- XentaurHub Loader (Full Neon + Key System + Modular)
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+local MarketplaceService = game:GetService("MarketplaceService")
 
+-- ==== SCREEN GUI ====
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "XentaurHubUI"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
@@ -17,7 +20,7 @@ Frame.Parent = ScreenGui
 
 -- Glow effect (neon)
 local UIStroke = Instance.new("UIStroke")
-UIStroke.Thickness = 2
+UIStroke.Thickness = 3
 UIStroke.Color = Color3.fromRGB(0, 255, 150)
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStroke.Parent = Frame
@@ -42,6 +45,7 @@ TextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.Font = Enum.Font.Gotham
 TextBox.TextSize = 18
+TextBox.ClearTextOnFocus = false
 TextBox.Parent = Frame
 
 -- Enter Button
@@ -66,26 +70,40 @@ GetKeyBtn.TextSize = 18
 GetKeyBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 GetKeyBtn.Parent = Frame
 
--- SYSTEM
-local correctKey = "ArmansyahOfc" -- ganti sesuai key yang kamu mau
+-- ==== SYSTEM ====
+local VALID_KEY = "ArmansyahOfc" -- ganti sesuai keinginan
+
+local function loadGameScript()
+    local success, gameName = pcall(function()
+        return MarketplaceService:GetProductInfo(game.PlaceId).Name
+    end)
+    if not success then
+        warn("Gagal ambil nama game.")
+        return
+    end
+
+    -- Nama file sesuai game
+    local fileName = gameName:gsub(" ", "_") .. ".lua"
+    if isfile(fileName) then
+        loadfile(fileName)()
+        print("✅ Memuat script: " .. fileName)
+    else
+        warn("❌ Script untuk game " .. gameName .. " tidak ditemukan!")
+    end
+end
 
 EnterBtn.MouseButton1Click:Connect(function()
-    if TextBox.Text == correctKey then
+    if TextBox.Text == VALID_KEY then
         Frame:Destroy()
-        -- ambil nama game
-        local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-        local fileName = gameName:gsub(" ", "_") .. ".lua"
-        if isfile(fileName) then
-            loadfile(fileName)()
-        else
-            warn("Script untuk game " .. gameName .. " tidak ditemukan!")
-        end
+        loadGameScript()
     else
         TextBox.Text = ""
         TextBox.PlaceholderText = "Key salah!"
+        TextBox.TextColor3 = Color3.fromRGB(255,0,0)
     end
 end)
 
 GetKeyBtn.MouseButton1Click:Connect(function()
     setclipboard("https://discord.gg/ceJD94MW") -- ganti link ke sistem key kamu
 end)
+
